@@ -1,0 +1,444 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MediPulse AI - Clinical Chatbot & Triage Assistant</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+  <!-- Medical Disclaimer Header -->
+  <div class="disclaimer-banner" id="disclaimerBanner">
+    <div class="disclaimer-text">
+      <span>⚠️</span>
+      <span><strong>Medical Disclaimer:</strong> MediPulse AI is an AI assistant for informational and triage assessment purposes only. It is NOT a substitute for professional medical advice, diagnosis, or treatment. Always consult a physician for medical concerns.</span>
+    </div>
+    <button class="disclaimer-btn" onclick="document.getElementById('disclaimerBanner').style.display='none'">Acknowledge & Dismiss</button>
+  </div>
+
+  <!-- App Top Navigation Bar -->
+  <header class="app-header">
+    <div class="brand-container">
+      <div class="brand-logo">🩺</div>
+      <div>
+        <div class="brand-title">MediPulse AI</div>
+        <div class="brand-subtitle">Clinical Triage & Health Intelligence</div>
+      </div>
+    </div>
+
+    <div class="header-controls">
+      <button class="icon-btn sos-btn-pulse" onclick="switchTab('tab-emergency')">
+        <span>🚨</span> SOS Emergency
+      </button>
+      <button class="icon-btn" onclick="openReportModal()" title="Export Summary Report">
+        <span>📄</span> Medical Summary
+      </button>
+      <button class="icon-btn" id="themeToggleBtn" onclick="toggleTheme()" title="Toggle Dark/Light Mode">
+        <span>🌙</span>
+      </button>
+      <button class="icon-btn" onclick="clearChatHistory()" title="Clear Chat Transcript">
+        <span>🗑️</span>
+      </button>
+    </div>
+  </header>
+
+  <!-- Main Layout -->
+  <div class="main-app-container">
+
+    <!-- Left Navigation Sidebar -->
+    <aside class="sidebar-panel">
+      <!-- Patient Context Profile -->
+      <div class="patient-profile-card">
+        <div class="patient-avatar-row">
+          <div class="patient-avatar">👤</div>
+          <div>
+            <div class="patient-info-name">Alex Mercer</div>
+            <div class="patient-info-meta">Male, 34 yrs • ID: #MP-8821</div>
+          </div>
+        </div>
+        <div class="patient-tags">
+          <span class="tag-badge">Penicillin Allergy</span>
+          <span class="tag-badge allergy">Asthma</span>
+          <span class="tag-badge">Lisinopril 10mg</span>
+        </div>
+      </div>
+
+      <!-- Navigation Tabs -->
+      <nav class="nav-menu">
+        <button class="nav-tab-btn active" onclick="switchTab('tab-chat')" id="nav-tab-chat">
+          <span class="tab-icon">💬</span> AI Clinical Chatbot
+        </button>
+        <button class="nav-tab-btn" onclick="switchTab('tab-meds')" id="nav-tab-meds">
+          <span class="tab-icon">💊</span> Medication & Interactions
+        </button>
+        <button class="nav-tab-btn" onclick="switchTab('tab-symptoms')" id="nav-tab-symptoms">
+          <span class="tab-icon">🧍</span> Body & Symptom Visualizer
+        </button>
+        <button class="nav-tab-btn" onclick="switchTab('tab-vitals')" id="nav-tab-vitals">
+          <span class="tab-icon">📊</span> Vitals & Health Metrics
+        </button>
+        <button class="nav-tab-btn" onclick="switchTab('tab-emergency')" id="nav-tab-emergency">
+          <span class="tab-icon">🚑</span> Emergency Care Locator
+        </button>
+      </nav>
+
+      <!-- Mini Vitals Snapshot Box -->
+      <div class="vitals-mini-box">
+        <div class="vitals-mini-title">Latest Vitals Log</div>
+        <div class="vitals-mini-grid">
+          <div class="vitals-mini-item">
+            <div>Heart Rate</div>
+            <div class="vitals-mini-val" id="miniBpm">72 BPM</div>
+          </div>
+          <div class="vitals-mini-item">
+            <div>Blood Press.</div>
+            <div class="vitals-mini-val" id="miniBp">120/80</div>
+          </div>
+          <div class="vitals-mini-item">
+            <div>Oxygen SpO2</div>
+            <div class="vitals-mini-val" id="miniSpo2">98%</div>
+          </div>
+          <div class="vitals-mini-item">
+            <div>Temp</div>
+            <div class="vitals-mini-val" id="miniTemp">98.6°F</div>
+          </div>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Main Workspace Content Area -->
+    <main class="content-panel-container">
+
+      <!-- TAB 1: AI Chatbot -->
+      <section class="tab-content active" id="tab-chat">
+        <div class="chat-window">
+          <div class="messages-scroll-area" id="messagesArea">
+            <!-- Initial AI Welcome Message -->
+            <div class="chat-bubble ai-msg">
+              <div class="avatar-icon">🩺</div>
+              <div class="bubble-content">
+                <strong>Welcome to MediPulse AI!</strong> I am your clinical triage assistant and health intelligence tool.<br><br>
+                You can ask me about symptoms, medication side effects, drug-drug interaction warnings, or general health guidance.
+                <div class="response-card">
+                  <div class="response-header">
+                    <span>Quick Start Options</span>
+                    <span class="triage-badge safe">Ready</span>
+                  </div>
+                  <ul class="action-checklist">
+                    <li>Describe your current symptoms in plain natural language</li>
+                    <li>Check if two or more medications interact safely</li>
+                    <li>Log your vital signs for a doctor visit summary</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Quick Action Prompts -->
+          <div class="quick-prompts-bar" id="quickPromptsContainer">
+            <!-- Populated via app.js -->
+          </div>
+
+          <!-- Chat Input Bar -->
+          <div class="chat-input-bar">
+            <button class="mic-btn" id="micBtn" onclick="toggleVoiceInput()" title="Voice Speech Input">
+              🎙️
+            </button>
+            <input type="text" class="chat-input-field" id="userInput" placeholder="Ask about symptoms, medication interaction (e.g. 'Aspirin and Ibuprofen'), or health queries..." onkeydown="handleKeyPress(event)">
+            <button class="send-btn" onclick="sendMessage()" title="Send Message">
+              ➔
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <!-- TAB 2: Medication & Drug Interaction Tracker -->
+      <section class="tab-content" id="tab-meds">
+        <div class="section-title-row">
+          <div>
+            <h2>Medication Cabinet & Drug Interaction Checker</h2>
+            <p style="font-size:0.85rem; color:var(--text-muted);">Manage your active prescriptions, analyze drug-drug safety hazards, and check dosage recommendations.</p>
+          </div>
+          <button class="icon-btn" onclick="checkCabinetInteractions()">
+            <span>⚡</span> Scan Cabinet Interactions
+          </button>
+        </div>
+
+        <div class="meds-grid-layout">
+          <!-- Add / Search Prescriptions -->
+          <div class="meds-card-box">
+            <h3>Add Medication to Cabinet</h3>
+            <div style="margin-top: 12px;">
+              <label style="font-size: 0.8rem; color: var(--text-muted);">Select or type drug name:</label>
+              <input type="text" class="med-search-input" id="medSearchInput" placeholder="e.g. Aspirin, Ibuprofen, Lisinopril, Warfarin..." list="medsDatalist">
+              <datalist id="medsDatalist"></datalist>
+
+              <div style="display: flex; gap: 8px; margin-top: 8px;">
+                <input type="text" class="med-search-input" id="medDosageInput" placeholder="Dosage (e.g. 200mg daily)" style="flex: 1;">
+                <button class="icon-btn" style="background: var(--primary-teal); color: white; border: none; height: 38px;" onclick="addMedicationFromInput()">
+                  + Add Drug
+                </button>
+              </div>
+            </div>
+
+            <!-- Drug Interaction Scanner Box -->
+            <div style="margin-top: 24px;">
+              <h3>Multi-Drug Interaction Analysis</h3>
+              <p style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 8px;">Select drugs to evaluate potential pharmacological conflicts:</p>
+              <div id="interactionCheckboxes" style="display: flex; flex-direction: column; gap: 6px; max-height: 160px; overflow-y: auto;">
+                <!-- Populated dynamically -->
+              </div>
+              <button class="icon-btn" style="margin-top: 12px; width: 100%; justify-content: center; background: rgba(6, 182, 212, 0.15); border-color: var(--accent-cyan); color: var(--accent-cyan);" onclick="analyzeSelectedInteractions()">
+                🔬 Run Clinical Interaction Analysis
+              </button>
+            </div>
+          </div>
+
+          <!-- Active Cabinet & Interaction Alerts -->
+          <div class="meds-card-box">
+            <h3>My Active Prescription Cabinet (<span id="cabinetCount">0</span>)</h3>
+            <div class="cabinet-list" id="cabinetListContainer" style="margin-top: 12px;">
+              <!-- Dynamic Cabinet Items -->
+            </div>
+
+            <!-- Interaction Warning Box Output -->
+            <div id="interactionAlertOutput" style="display: none;">
+              <!-- Dynamic Alert Card -->
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- TAB 3: Body & Symptom Visualizer -->
+      <section class="tab-content" id="tab-symptoms">
+        <div class="section-title-row">
+          <div>
+            <h2>Interactive Body Region & Symptom Triage Tool</h2>
+            <p style="font-size:0.85rem; color:var(--text-muted);">Select body regions to isolate symptoms, rate pain levels, and receive automated clinical triage suggestions.</p>
+          </div>
+        </div>
+
+        <div class="body-map-container">
+          <!-- Body Region Selector Grid -->
+          <div>
+            <h3>1. Select Affected Body Area</h3>
+            <div class="body-regions-grid" id="bodyRegionsContainer" style="margin-top: 12px;">
+              <!-- Dynamic Body Cards -->
+            </div>
+
+            <!-- Specific Symptoms Checklist -->
+            <div style="margin-top: 20px;">
+              <h3>2. Select Associated Symptoms</h3>
+              <div id="symptomsChecklistContainer" style="display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px;">
+                <p style="font-size: 0.85rem; color: var(--text-muted);">Select a body region above to display symptoms.</p>
+              </div>
+            </div>
+
+            <!-- Pain Scale Slider -->
+            <div class="pain-scale-group" style="margin-top: 24px;">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                <label style="font-size: 0.9rem; font-weight: 600;">Pain Severity Scale (1 - 10):</label>
+                <span id="painValueLabel" style="font-weight: 700; color: var(--accent-cyan); font-size: 1.1rem;">5 / 10 (Moderate)</span>
+              </div>
+              <input type="range" min="1" max="10" value="5" class="range-slider" id="painSlider" oninput="updatePainLabel(this.value)">
+            </div>
+
+            <button class="icon-btn" style="width: 100%; justify-content: center; background: linear-gradient(135deg, var(--primary-teal), var(--accent-cyan)); color: white; padding: 12px; font-size: 1rem;" onclick="generateTriageFromVisualizer()">
+              🩺 Generate Clinical Assessment
+            </button>
+          </div>
+
+          <!-- Triage Assessment Result Output -->
+          <div class="meds-card-box" id="triageResultBox">
+            <h3>Clinical Triage Assessment</h3>
+            <div style="margin-top: 12px; color: var(--text-muted); font-size: 0.88rem;" id="triageResultContent">
+              Select body areas and symptoms on the left to run an automated triage assessment.
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- TAB 4: Health Vitals & Metric Tracker -->
+      <section class="tab-content" id="tab-vitals">
+        <div class="section-title-row">
+          <div>
+            <h2>Health Vitals & Biometric Tracker</h2>
+            <p style="font-size:0.85rem; color:var(--text-muted);">Log biometrics, track physiological trends, and keep records for your medical provider.</p>
+          </div>
+        </div>
+
+        <div class="vitals-grid">
+          <div class="vital-card">
+            <div style="font-size: 24px;">❤️</div>
+            <div style="font-size: 0.85rem; color: var(--text-muted);">Heart Rate</div>
+            <div class="vital-value" id="valHeartRate">72 <span style="font-size:0.9rem;">BPM</span></div>
+            <div style="font-size: 0.75rem; color: var(--severity-safe);">Normal Resting</div>
+          </div>
+
+          <div class="vital-card">
+            <div style="font-size: 24px;">🩸</div>
+            <div style="font-size: 0.85rem; color: var(--text-muted);">Blood Pressure</div>
+            <div class="vital-value" id="valBp">120/80 <span style="font-size:0.9rem;">mmHg</span></div>
+            <div style="font-size: 0.75rem; color: var(--severity-safe);">Optimal Range</div>
+          </div>
+
+          <div class="vital-card">
+            <div style="font-size: 24px;">🫁</div>
+            <div style="font-size: 0.85rem; color: var(--text-muted);">Blood Oxygen</div>
+            <div class="vital-value" id="valSpo2">98 <span style="font-size:0.9rem;">%</span></div>
+            <div style="font-size: 0.75rem; color: var(--severity-safe);">Normal Oxygenation</div>
+          </div>
+
+          <div class="vital-card">
+            <div style="font-size: 24px;">🌡️</div>
+            <div style="font-size: 0.85rem; color: var(--text-muted);">Temperature</div>
+            <div class="vital-value" id="valTemp">98.6 <span style="font-size:0.9rem;">°F</span></div>
+            <div style="font-size: 0.75rem; color: var(--severity-safe);">Afebrile</div>
+          </div>
+        </div>
+
+        <!-- Log New Vitals Form -->
+        <div class="meds-card-box">
+          <h3>Update Vitals Log</h3>
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 12px; margin-top: 14px;">
+            <div>
+              <label style="font-size: 0.78rem; color: var(--text-muted);">Heart Rate (BPM)</label>
+              <input type="number" class="med-search-input" id="inputBpm" placeholder="72">
+            </div>
+            <div>
+              <label style="font-size: 0.78rem; color: var(--text-muted);">Systolic (mmHg)</label>
+              <input type="number" class="med-search-input" id="inputSys" placeholder="120">
+            </div>
+            <div>
+              <label style="font-size: 0.78rem; color: var(--text-muted);">Diastolic (mmHg)</label>
+              <input type="number" class="med-search-input" id="inputDia" placeholder="80">
+            </div>
+            <div>
+              <label style="font-size: 0.78rem; color: var(--text-muted);">SpO2 (%)</label>
+              <input type="number" class="med-search-input" id="inputSpo2" placeholder="98">
+            </div>
+            <div>
+              <label style="font-size: 0.78rem; color: var(--text-muted);">Temp (°F)</label>
+              <input type="number" step="0.1" class="med-search-input" id="inputTemp" placeholder="98.6">
+            </div>
+          </div>
+          <button class="icon-btn" style="margin-top: 12px; background: var(--primary-teal); color: white; border: none; padding: 10px 20px;" onclick="saveVitalsLog()">
+            💾 Update Vitals Record
+          </button>
+        </div>
+      </section>
+
+      <!-- TAB 5: Emergency SOS & Care Locator -->
+      <section class="tab-content" id="tab-emergency">
+        <div style="background: rgba(239, 68, 68, 0.15); border: 1px solid rgba(239, 68, 68, 0.4); border-radius: var(--radius-lg); padding: 20px; text-align: center; margin-bottom: 20px;">
+          <h2 style="color: #fca5a5; font-size: 1.5rem;">🚨 Medical Emergency Alert Hotline</h2>
+          <p style="font-size: 0.9rem; color: #fecaca; margin-top: 6px;">If you or someone around you is experiencing life-threatening symptoms (crushing chest pain, severe shortness of breath, sudden numbness, unconsciousness), act immediately!</p>
+          <div style="display: flex; justify-content: center; gap: 16px; margin-top: 16px; flex-wrap: wrap;">
+            <a href="tel:911" class="icon-btn sos-btn-pulse" style="padding: 12px 24px; font-size: 1.1rem; text-decoration: none;">
+              📞 Call 911 (US Emergency)
+            </a>
+            <a href="tel:112" class="icon-btn" style="background: rgba(239, 68, 68, 0.3); border-color: red; color: white; padding: 12px 24px; font-size: 1.1rem; text-decoration: none;">
+              📞 Call 112 (EU / Global)
+            </a>
+            <a href="tel:18002221222" class="icon-btn" style="background: rgba(234, 179, 8, 0.2); border-color: gold; color: #fde047; padding: 12px 24px; font-size: 0.95rem; text-decoration: none;">
+              🧪 Poison Control Hotline
+            </a>
+            <a href="tel:988" class="icon-btn" style="background: rgba(59, 130, 246, 0.2); border-color: #3b82f6; color: #93c5fd; padding: 12px 24px; font-size: 0.95rem; text-decoration: none;">
+              🧠 988 Suicide & Crisis Lifeline
+            </a>
+          </div>
+        </div>
+
+        <div class="meds-card-box">
+          <h3>📍 Simulated Nearby Urgent Care & ER Locator</h3>
+          <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 12px;">Real-time estimated distance and emergency room triage wait times:</p>
+
+          <div style="display: flex; flex-direction: column; gap: 10px;">
+            <div class="cabinet-item">
+              <div>
+                <h4 style="color: var(--text-main);">St. Jude Regional Medical Center - Emergency Dept</h4>
+                <p style="font-size: 0.8rem; color: var(--text-muted);">1.4 miles away • 24/7 Level 1 Trauma Center</p>
+              </div>
+              <div style="text-align: right;">
+                <span class="triage-badge safe">Wait: ~12 mins</span>
+                <button class="icon-btn" style="margin-top: 4px; font-size: 0.75rem;" onclick="alert('Opening navigation directions...')">🗺️ Directions</button>
+              </div>
+            </div>
+
+            <div class="cabinet-item">
+              <div>
+                <h4 style="color: var(--text-main);">Mercy Urgent Care Clinic</h4>
+                <p style="font-size: 0.8rem; color: var(--text-muted);">2.8 miles away • Open until 10:00 PM</p>
+              </div>
+              <div style="text-align: right;">
+                <span class="triage-badge moderate">Wait: ~25 mins</span>
+                <button class="icon-btn" style="margin-top: 4px; font-size: 0.75rem;" onclick="alert('Opening navigation directions...')">🗺️ Directions</button>
+              </div>
+            </div>
+
+            <div class="cabinet-item">
+              <div>
+                <h4 style="color: var(--text-main);">University Health Emergency Pavilion</h4>
+                <p style="font-size: 0.8rem; color: var(--text-muted);">4.1 miles away • 24/7 Stroke & Cardiac Specialty</p>
+              </div>
+              <div style="text-align: right;">
+                <span class="triage-badge safe">Wait: ~8 mins</span>
+                <button class="icon-btn" style="margin-top: 4px; font-size: 0.75rem;" onclick="alert('Opening navigation directions...')">🗺️ Directions</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+    </main>
+  </div>
+
+  <!-- Medical Report Export Modal -->
+  <div class="modal-overlay" id="reportModal">
+    <div class="modal-content">
+      <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--panel-border); padding-bottom: 12px;">
+        <h3>📄 Doctor Visit Medical Summary Report</h3>
+        <button class="icon-btn" onclick="closeReportModal()">✕</button>
+      </div>
+
+      <div id="reportPrintArea" style="padding: 16px 0; font-size: 0.9rem; line-height: 1.6;">
+        <!-- Dynamically generated summary -->
+      </div>
+
+      <div style="display: flex; justify-content: flex-end; gap: 12px; border-top: 1px solid var(--panel-border); padding-top: 12px;">
+        <button class="icon-btn" onclick="window.print()">🖨️ Print / Save as PDF</button>
+        <button class="icon-btn" style="background: var(--primary-teal); color: white; border: none;" onclick="closeReportModal()">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Emergency Red Flag Alert Modal -->
+  <div class="modal-overlay" id="emergencyModal">
+    <div class="modal-content" style="border-color: #ef4444; background: #1c0a0a;">
+      <div style="text-align: center; padding: 12px;">
+        <div style="font-size: 48px;">🚨</div>
+        <h2 style="color: #fca5a5; font-size: 1.6rem; margin-top: 8px;">EMERGENCY RED FLAG DETECTED</h2>
+        <p style="font-size: 0.95rem; color: #fecaca; margin-top: 10px;" id="emergencyModalText">
+          Your input contains signs associated with a potentially life-threatening medical emergency.
+        </p>
+        <div style="background: rgba(239, 68, 68, 0.2); border: 1px solid red; padding: 12px; border-radius: var(--radius-md); margin: 16px 0; text-align: left;">
+          <strong style="color: white;">Recommended Immediate Action:</strong>
+          <ul style="color: #fecaca; margin-left: 20px; margin-top: 6px; font-size: 0.88rem;">
+            <li>Call 911 or your local emergency dispatch service immediately.</li>
+            <li>Do not attempt to drive yourself if experiencing severe pain or shortness of breath.</li>
+            <li>Unlock front door so emergency responders can access your location.</li>
+          </ul>
+        </div>
+        <div style="display: flex; justify-content: center; gap: 12px;">
+          <a href="tel:911" class="icon-btn sos-btn-pulse" style="padding: 10px 20px; text-decoration: none;">📞 Dial 911 Now</a>
+          <button class="icon-btn" onclick="document.getElementById('emergencyModal').classList.remove('active')">Dismiss Alert</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="medical-data.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>

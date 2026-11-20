@@ -1,0 +1,2121 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MediPulse AI - Self-Contained Medical Chatbot & Triage Assistant</title>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700;800&display=swap">
+  <style>
+    /* MediPulse AI - Modern Medical Glassmorphism Design System */
+    :root {
+      --bg-gradient: linear-gradient(135deg, #090d16 0%, #0f172a 50%, #0c1c2e 100%);
+      --panel-bg: rgba(15, 23, 42, 0.75);
+      --panel-border: rgba(255, 255, 255, 0.08);
+      --glass-glow: rgba(13, 148, 136, 0.15);
+      
+      --primary-teal: #0d9488;
+      --primary-teal-hover: #14b8a6;
+      --accent-cyan: #06b6d4;
+      --accent-blue: #3b82f6;
+      
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+      --text-dim: #64748b;
+      
+      --severity-emergency: #ef4444;
+      --severity-warning: #f59e0b;
+      --severity-moderate: #eab308;
+      --severity-safe: #10b981;
+      
+      --radius-sm: 8px;
+      --radius-md: 14px;
+      --radius-lg: 20px;
+      --radius-full: 9999px;
+
+      --shadow-sm: 0 4px 6px -1px rgba(0, 0, 0, 0.3);
+      --shadow-glow: 0 0 25px rgba(6, 182, 212, 0.25);
+      --transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    [data-theme="light"] {
+      --bg-gradient: linear-gradient(135deg, #f0fdfa 0%, #e0f2fe 50%, #f1f5f9 100%);
+      --panel-bg: rgba(255, 255, 255, 0.85);
+      --panel-border: rgba(0, 0, 0, 0.08);
+      --glass-glow: rgba(13, 148, 136, 0.1);
+      --text-main: #0f172a;
+      --text-muted: #475569;
+      --text-dim: #94a3b8;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--bg-gradient);
+      color: var(--text-main);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      overflow-x: hidden;
+    }
+
+    h1, h2, h3, h4, h5, .brand-title {
+      font-family: 'Outfit', sans-serif;
+    }
+
+    .disclaimer-banner {
+      background: linear-gradient(90deg, #1e1b4b 0%, #311042 50%, #1e1b4b 100%);
+      border-bottom: 1px solid rgba(239, 68, 68, 0.3);
+      color: #fecaca;
+      font-size: 0.82rem;
+      padding: 8px 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      z-index: 100;
+    }
+
+    .disclaimer-text {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-weight: 500;
+    }
+
+    .disclaimer-btn {
+      background: rgba(239, 68, 68, 0.2);
+      border: 1px solid rgba(239, 68, 68, 0.4);
+      color: #fca5a5;
+      padding: 4px 10px;
+      border-radius: var(--radius-sm);
+      font-size: 0.75rem;
+      cursor: pointer;
+      transition: var(--transition);
+    }
+
+    .disclaimer-btn:hover {
+      background: rgba(239, 68, 68, 0.4);
+    }
+
+    .app-header {
+      backdrop-filter: blur(16px);
+      background: var(--panel-bg);
+      border-bottom: 1px solid var(--panel-border);
+      padding: 12px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: sticky;
+      top: 0;
+      z-index: 90;
+    }
+
+    .brand-container {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .brand-logo {
+      width: 38px;
+      height: 38px;
+      background: linear-gradient(135deg, var(--primary-teal), var(--accent-cyan));
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+      box-shadow: 0 0 15px rgba(6, 182, 212, 0.4);
+    }
+
+    .brand-title {
+      font-size: 1.35rem;
+      font-weight: 700;
+      background: linear-gradient(90deg, #ffffff, var(--accent-cyan));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .brand-subtitle {
+      font-size: 0.72rem;
+      color: var(--accent-cyan);
+      font-weight: 600;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+    }
+
+    .header-controls {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .icon-btn {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid var(--panel-border);
+      color: var(--text-main);
+      padding: 8px 14px;
+      border-radius: var(--radius-md);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.85rem;
+      font-weight: 500;
+      transition: var(--transition);
+    }
+
+    .icon-btn:hover {
+      background: rgba(255, 255, 255, 0.12);
+      border-color: var(--accent-cyan);
+    }
+
+    .sos-btn-pulse {
+      background: linear-gradient(135deg, #dc2626, #b91c1c);
+      border: none;
+      color: white;
+      font-weight: 700;
+      box-shadow: 0 0 15px rgba(220, 38, 38, 0.5);
+      animation: pulse-red 2s infinite;
+    }
+
+    @keyframes pulse-red {
+      0% { box-shadow: 0 0 0 0 rgba(220, 38, 38, 0.7); }
+      70% { box-shadow: 0 0 0 12px rgba(220, 38, 38, 0); }
+      100% { box-shadow: 0 0 0 0 rgba(220, 38, 38, 0); }
+    }
+
+    .main-app-container {
+      display: grid;
+      grid-template-columns: 290px 1fr;
+      flex: 1;
+      max-width: 1600px;
+      width: 100%;
+      margin: 0 auto;
+      padding: 16px;
+      gap: 16px;
+      height: calc(100vh - 95px);
+    }
+
+    .sidebar-panel {
+      background: var(--panel-bg);
+      backdrop-filter: blur(12px);
+      border: 1px solid var(--panel-border);
+      border-radius: var(--radius-lg);
+      padding: 18px;
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+      overflow-y: auto;
+    }
+
+    .patient-profile-card {
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid var(--panel-border);
+      border-radius: var(--radius-md);
+      padding: 14px;
+      position: relative;
+    }
+
+    .patient-avatar-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 10px;
+    }
+
+    .patient-avatar {
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #0284c7, #0d9488);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 22px;
+    }
+
+    .patient-info-name {
+      font-weight: 700;
+      font-size: 0.98rem;
+    }
+
+    .patient-info-meta {
+      font-size: 0.76rem;
+      color: var(--text-muted);
+    }
+
+    .patient-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-top: 8px;
+    }
+
+    .tag-badge {
+      background: rgba(13, 148, 136, 0.15);
+      border: 1px solid rgba(13, 148, 136, 0.3);
+      color: var(--accent-cyan);
+      font-size: 0.72rem;
+      padding: 2px 8px;
+      border-radius: var(--radius-full);
+    }
+
+    .tag-badge.allergy {
+      background: rgba(239, 68, 68, 0.15);
+      border-color: rgba(239, 68, 68, 0.3);
+      color: #fca5a5;
+    }
+
+    .nav-menu {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .nav-tab-btn {
+      background: transparent;
+      border: 1px solid transparent;
+      color: var(--text-muted);
+      padding: 12px 14px;
+      border-radius: var(--radius-md);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-size: 0.9rem;
+      font-weight: 500;
+      transition: var(--transition);
+      text-align: left;
+    }
+
+    .nav-tab-btn:hover {
+      background: rgba(255, 255, 255, 0.05);
+      color: var(--text-main);
+    }
+
+    .nav-tab-btn.active {
+      background: linear-gradient(90deg, rgba(13, 148, 136, 0.25), rgba(6, 182, 212, 0.15));
+      border: 1px solid rgba(6, 182, 212, 0.3);
+      color: var(--accent-cyan);
+      font-weight: 600;
+    }
+
+    .vitals-mini-box {
+      margin-top: auto;
+      background: rgba(255, 255, 255, 0.02);
+      border: 1px solid var(--panel-border);
+      border-radius: var(--radius-md);
+      padding: 12px;
+    }
+
+    .vitals-mini-title {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 8px;
+      font-weight: 600;
+    }
+
+    .vitals-mini-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+    }
+
+    .vitals-mini-item {
+      background: rgba(0, 0, 0, 0.2);
+      padding: 6px 8px;
+      border-radius: var(--radius-sm);
+      font-size: 0.78rem;
+    }
+
+    .vitals-mini-val {
+      font-weight: 700;
+      color: var(--accent-cyan);
+    }
+
+    .content-panel-container {
+      background: var(--panel-bg);
+      backdrop-filter: blur(12px);
+      border: 1px solid var(--panel-border);
+      border-radius: var(--radius-lg);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .tab-content {
+      display: none;
+      flex: 1;
+      flex-direction: column;
+      height: 100%;
+      overflow-y: auto;
+      padding: 20px;
+    }
+
+    .tab-content.active {
+      display: flex;
+    }
+
+    .chat-window {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    .messages-scroll-area {
+      flex: 1;
+      overflow-y: auto;
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      scroll-behavior: smooth;
+    }
+
+    .chat-bubble {
+      display: flex;
+      gap: 12px;
+      max-width: 85%;
+      animation: fadeIn 0.3s ease-out;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(6px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .chat-bubble.user-msg {
+      align-self: flex-end;
+      flex-direction: row-reverse;
+    }
+
+    .avatar-icon {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      font-size: 16px;
+    }
+
+    .user-msg .avatar-icon {
+      background: var(--accent-blue);
+    }
+
+    .ai-msg .avatar-icon {
+      background: linear-gradient(135deg, var(--primary-teal), var(--accent-cyan));
+      box-shadow: 0 0 10px rgba(6, 182, 212, 0.3);
+    }
+
+    .bubble-content {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid var(--panel-border);
+      border-radius: var(--radius-md);
+      padding: 14px 18px;
+      line-height: 1.55;
+      font-size: 0.92rem;
+    }
+
+    .user-msg .bubble-content {
+      background: linear-gradient(135deg, #1e3a8a, #1d4ed8);
+      border-color: rgba(59, 130, 246, 0.4);
+      color: #ffffff;
+    }
+
+    .response-card {
+      background: rgba(15, 23, 42, 0.85);
+      border: 1px solid var(--panel-border);
+      border-radius: var(--radius-md);
+      padding: 16px;
+      margin-top: 12px;
+    }
+
+    .response-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 10px;
+    }
+
+    .triage-badge {
+      padding: 4px 12px;
+      border-radius: var(--radius-full);
+      font-size: 0.75rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .triage-badge.safe { background: rgba(16, 185, 129, 0.2); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.4); }
+    .triage-badge.moderate { background: rgba(234, 179, 8, 0.2); color: #fde047; border: 1px solid rgba(234, 179, 8, 0.4); }
+    .triage-badge.warning { background: rgba(245, 158, 11, 0.2); color: #fbbf24; border: 1px solid rgba(245, 158, 11, 0.4); }
+    .triage-badge.emergency { background: rgba(239, 68, 68, 0.25); color: #fca5a5; border: 1px solid rgba(239, 68, 68, 0.6); animation: pulse-red 2s infinite; }
+
+    .differential-list {
+      margin: 10px 0;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .diff-item {
+      background: rgba(255, 255, 255, 0.03);
+      padding: 8px 12px;
+      border-radius: var(--radius-sm);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 0.85rem;
+    }
+
+    .progress-bar-bg {
+      width: 80px;
+      height: 6px;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: var(--radius-full);
+      overflow: hidden;
+    }
+
+    .progress-bar-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--primary-teal), var(--accent-cyan));
+    }
+
+    .action-checklist {
+      list-style: none;
+      margin-top: 10px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .action-checklist li {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.85rem;
+      color: var(--text-muted);
+    }
+
+    .action-checklist li::before {
+      content: "✓";
+      color: var(--accent-cyan);
+      font-weight: bold;
+    }
+
+    .quick-prompts-bar {
+      display: flex;
+      gap: 8px;
+      padding: 8px 16px;
+      overflow-x: auto;
+      border-top: 1px solid var(--panel-border);
+      background: rgba(0, 0, 0, 0.15);
+    }
+
+    .prompt-chip {
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid var(--panel-border);
+      color: var(--text-muted);
+      padding: 6px 14px;
+      border-radius: var(--radius-full);
+      font-size: 0.78rem;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: var(--transition);
+    }
+
+    .prompt-chip:hover {
+      background: rgba(6, 182, 212, 0.15);
+      border-color: var(--accent-cyan);
+      color: var(--accent-cyan);
+    }
+
+    .chat-input-bar {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 14px 16px;
+      background: rgba(15, 23, 42, 0.9);
+      border-top: 1px solid var(--panel-border);
+    }
+
+    .chat-input-field {
+      flex: 1;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid var(--panel-border);
+      color: var(--text-main);
+      padding: 12px 18px;
+      border-radius: var(--radius-full);
+      font-size: 0.9rem;
+      outline: none;
+      transition: var(--transition);
+    }
+
+    .chat-input-field:focus {
+      border-color: var(--accent-cyan);
+      box-shadow: 0 0 12px rgba(6, 182, 212, 0.25);
+    }
+
+    .send-btn {
+      background: linear-gradient(135deg, var(--primary-teal), var(--accent-cyan));
+      border: none;
+      color: white;
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+      transition: var(--transition);
+    }
+
+    .send-btn:hover {
+      transform: scale(1.05);
+      box-shadow: var(--shadow-glow);
+    }
+
+    .mic-btn {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid var(--panel-border);
+      color: var(--text-muted);
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+      transition: var(--transition);
+    }
+
+    .mic-btn.recording {
+      background: rgba(239, 68, 68, 0.3);
+      color: #ef4444;
+      border-color: #ef4444;
+      animation: pulse-red 1.5s infinite;
+    }
+
+    .section-title-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 16px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid var(--panel-border);
+    }
+
+    .meds-grid-layout {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+    }
+
+    .meds-card-box {
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid var(--panel-border);
+      border-radius: var(--radius-md);
+      padding: 18px;
+    }
+
+    .med-search-input {
+      width: 100%;
+      background: rgba(0, 0, 0, 0.2);
+      border: 1px solid var(--panel-border);
+      color: var(--text-main);
+      padding: 10px 14px;
+      border-radius: var(--radius-md);
+      font-size: 0.88rem;
+      margin-bottom: 12px;
+    }
+
+    .cabinet-list {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      max-height: 380px;
+      overflow-y: auto;
+    }
+
+    .cabinet-item {
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid var(--panel-border);
+      border-radius: var(--radius-md);
+      padding: 12px 14px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .cabinet-item-info h4 {
+      font-size: 0.95rem;
+      color: var(--accent-cyan);
+    }
+
+    .cabinet-item-info p {
+      font-size: 0.78rem;
+      color: var(--text-muted);
+    }
+
+    .delete-med-btn {
+      background: rgba(239, 68, 68, 0.15);
+      border: 1px solid rgba(239, 68, 68, 0.3);
+      color: #fca5a5;
+      padding: 4px 8px;
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+    }
+
+    .interaction-alert-box {
+      background: rgba(239, 68, 68, 0.12);
+      border: 1px solid rgba(239, 68, 68, 0.4);
+      border-radius: var(--radius-md);
+      padding: 16px;
+      margin-top: 14px;
+    }
+
+    .interaction-alert-header {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      color: #fca5a5;
+      font-weight: 700;
+      font-size: 0.95rem;
+      margin-bottom: 8px;
+    }
+
+    .body-map-container {
+      display: grid;
+      grid-template-columns: 2fr 1fr;
+      gap: 20px;
+    }
+
+    .body-regions-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+      gap: 12px;
+    }
+
+    .body-region-card {
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid var(--panel-border);
+      border-radius: var(--radius-md);
+      padding: 16px;
+      cursor: pointer;
+      text-align: center;
+      transition: var(--transition);
+    }
+
+    .body-region-card:hover, .body-region-card.selected {
+      background: rgba(6, 182, 212, 0.15);
+      border-color: var(--accent-cyan);
+      transform: translateY(-2px);
+    }
+
+    .body-region-icon {
+      font-size: 32px;
+      margin-bottom: 8px;
+    }
+
+    .range-slider {
+      width: 100%;
+      accent-color: var(--accent-cyan);
+    }
+
+    .vitals-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+
+    .vital-card {
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid var(--panel-border);
+      border-radius: var(--radius-md);
+      padding: 18px;
+      text-align: center;
+    }
+
+    .vital-value {
+      font-size: 1.8rem;
+      font-weight: 800;
+      color: var(--accent-cyan);
+      margin: 8px 0;
+    }
+
+    .modal-overlay {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0, 0, 0, 0.75);
+      backdrop-filter: blur(8px);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+    }
+
+    .modal-overlay.active {
+      display: flex;
+    }
+
+    .modal-content {
+      background: #0f172a;
+      border: 1px solid var(--panel-border);
+      border-radius: var(--radius-lg);
+      max-width: 650px;
+      width: 90%;
+      max-height: 85vh;
+      overflow-y: auto;
+      padding: 24px;
+    }
+
+    @media (max-width: 960px) {
+      .main-app-container {
+        grid-template-columns: 1fr;
+        height: auto;
+      }
+      .meds-grid-layout, .body-map-container {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Medical Disclaimer Header -->
+  <div class="disclaimer-banner" id="disclaimerBanner">
+    <div class="disclaimer-text">
+      <span>⚠️</span>
+      <span><strong>Medical Disclaimer:</strong> MediPulse AI is an AI assistant for informational and triage assessment purposes only. It is NOT a substitute for professional medical advice, diagnosis, or treatment. Always consult a physician for medical concerns.</span>
+    </div>
+    <button class="disclaimer-btn" onclick="document.getElementById('disclaimerBanner').style.display='none'">Acknowledge & Dismiss</button>
+  </div>
+
+  <!-- App Top Navigation Bar -->
+  <header class="app-header">
+    <div class="brand-container">
+      <div class="brand-logo">🩺</div>
+      <div>
+        <div class="brand-title">MediPulse AI</div>
+        <div class="brand-subtitle">Clinical Triage & Health Intelligence</div>
+      </div>
+    </div>
+
+    <div class="header-controls">
+      <button class="icon-btn sos-btn-pulse" onclick="switchTab('tab-emergency')">
+        <span>🚨</span> SOS Emergency
+      </button>
+      <button class="icon-btn" onclick="openReportModal()" title="Export Summary Report">
+        <span>📄</span> Medical Summary
+      </button>
+      <button class="icon-btn" id="themeToggleBtn" onclick="toggleTheme()" title="Toggle Dark/Light Mode">
+        <span>🌙</span>
+      </button>
+      <button class="icon-btn" onclick="clearChatHistory()" title="Clear Chat Transcript">
+        <span>🗑️</span>
+      </button>
+    </div>
+  </header>
+
+  <!-- Main Layout -->
+  <div class="main-app-container">
+
+    <!-- Left Navigation Sidebar -->
+    <aside class="sidebar-panel">
+      <!-- Patient Context Profile Card -->
+      <div class="patient-profile-card">
+        <div class="patient-avatar-row">
+          <div class="patient-avatar" id="patientAvatarDisplay">👤</div>
+          <div>
+            <div class="patient-info-name" id="patientNameDisplay">Alex Mercer</div>
+            <div class="patient-info-meta" id="patientMetaDisplay">Male, 34 yrs • ID: #pat-1</div>
+          </div>
+        </div>
+        <div class="patient-tags" id="patientTagsDisplay">
+          <span class="tag-badge allergy">Penicillin Allergy</span>
+          <span class="tag-badge">Asthma</span>
+          <span class="tag-badge">Lisinopril 10mg</span>
+        </div>
+        <button class="icon-btn" style="margin-top: 10px; width: 100%; justify-content: center; font-size: 0.78rem; background: rgba(6,182,212,0.15); border-color: var(--accent-cyan); color: var(--accent-cyan);" onclick="openPatientModal()">
+          ✏️ Switch / Add Patient Profile
+        </button>
+      </div>
+
+      <!-- Navigation Tabs -->
+      <nav class="nav-menu">
+        <button class="nav-tab-btn active" onclick="switchTab('tab-chat')" id="nav-tab-chat">
+          <span class="tab-icon">💬</span> AI Clinical Chatbot
+        </button>
+        <button class="nav-tab-btn" onclick="switchTab('tab-meds')" id="nav-tab-meds">
+          <span class="tab-icon">💊</span> Medication & Interactions
+        </button>
+        <button class="nav-tab-btn" onclick="switchTab('tab-symptoms')" id="nav-tab-symptoms">
+          <span class="tab-icon">🧍</span> Body & Symptom Visualizer
+        </button>
+        <button class="nav-tab-btn" onclick="switchTab('tab-vitals')" id="nav-tab-vitals">
+          <span class="tab-icon">📊</span> Vitals & Health Metrics
+        </button>
+        <button class="nav-tab-btn" onclick="switchTab('tab-emergency')" id="nav-tab-emergency">
+          <span class="tab-icon">🚑</span> Emergency Care Locator
+        </button>
+      </nav>
+
+      <!-- Mini Vitals Snapshot Box -->
+      <div class="vitals-mini-box">
+        <div class="vitals-mini-title">Latest Vitals Log</div>
+        <div class="vitals-mini-grid">
+          <div class="vitals-mini-item">
+            <div>Heart Rate</div>
+            <div class="vitals-mini-val" id="miniBpm">72 BPM</div>
+          </div>
+          <div class="vitals-mini-item">
+            <div>Blood Press.</div>
+            <div class="vitals-mini-val" id="miniBp">120/80</div>
+          </div>
+          <div class="vitals-mini-item">
+            <div>Oxygen SpO2</div>
+            <div class="vitals-mini-val" id="miniSpo2">98%</div>
+          </div>
+          <div class="vitals-mini-item">
+            <div>Temp</div>
+            <div class="vitals-mini-val" id="miniTemp">98.6°F</div>
+          </div>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Main Workspace Content Area -->
+    <main class="content-panel-container">
+
+      <!-- TAB 1: AI Chatbot -->
+      <section class="tab-content active" id="tab-chat">
+        <div class="chat-window">
+          <!-- Top Medicine Quick Query Bar -->
+          <div style="padding: 10px 16px; background: rgba(0,0,0,0.2); border-bottom: 1px solid var(--panel-border);">
+            <div style="display: flex; gap: 8px; align-items: center;">
+              <span style="font-size: 0.82rem; color: var(--accent-cyan); font-weight: 600; white-space: nowrap;">🔍 Medicine Explorer:</span>
+              <input type="text" class="med-search-input" id="chatMedSearchInput" placeholder="Search any drug (e.g. Lisinopril, Warfarin, Amoxicillin)..." style="margin-bottom: 0;" oninput="searchMedicineDetails(this.value)" list="medsDatalist">
+            </div>
+            <div id="medQueryResultArea"></div>
+          </div>
+
+          <div class="messages-scroll-area" id="messagesArea">
+            <div class="chat-bubble ai-msg">
+              <div class="avatar-icon">🩺</div>
+              <div class="bubble-content">
+                <strong>Welcome to MediPulse AI!</strong> I am your clinical triage assistant.<br><br>
+                Current Active Patient: <strong id="activePatientWelcome" style="color:var(--accent-cyan);">Alex Mercer (34 yrs, Male)</strong>.
+                <div class="response-card">
+                  <div class="response-header">
+                    <span>Quick Start Options</span>
+                    <span class="triage-badge safe">Ready</span>
+                  </div>
+                  <ul class="action-checklist">
+                    <li>Describe your current symptoms in plain natural language</li>
+                    <li>Check if two or more medications interact safely</li>
+                    <li>Use the <strong>Medicine Explorer</strong> bar above to search any drug and append it to your prompt!</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="quick-prompts-bar" id="quickPromptsContainer"></div>
+
+          <div class="chat-input-bar">
+            <button class="mic-btn" id="micBtn" onclick="toggleVoiceInput()" title="Voice Speech Input">🎙️</button>
+            <input type="text" class="chat-input-field" id="userInput" placeholder="Ask about symptoms, medication interaction (e.g. 'Aspirin and Ibuprofen')..." onkeydown="handleKeyPress(event)">
+            <button class="send-btn" onclick="sendMessage()" title="Send Message">➔</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- TAB 2: Medication & Drug Interaction Tracker -->
+      <section class="tab-content" id="tab-meds">
+        <div class="section-title-row">
+          <div>
+            <h2>Medication Cabinet & Drug Interaction Checker</h2>
+            <p style="font-size:0.85rem; color:var(--text-muted);">Manage your active prescriptions, analyze drug-drug safety hazards, and check dosage recommendations.</p>
+          </div>
+          <button class="icon-btn" onclick="checkCabinetInteractions()">
+            <span>⚡</span> Scan Cabinet Interactions
+          </button>
+        </div>
+
+        <div class="meds-grid-layout">
+          <div class="meds-card-box">
+            <h3>Add Medication to Cabinet</h3>
+            <div style="margin-top: 12px;">
+              <label style="font-size: 0.8rem; color: var(--text-muted);">Select or type drug name:</label>
+              <input type="text" class="med-search-input" id="medSearchInput" placeholder="e.g. Aspirin, Ibuprofen, Lisinopril, Warfarin..." list="medsDatalist">
+              <datalist id="medsDatalist"></datalist>
+
+              <div style="display: flex; gap: 8px; margin-top: 8px;">
+                <input type="text" class="med-search-input" id="medDosageInput" placeholder="Dosage (e.g. 200mg daily)" style="flex: 1;">
+                <button class="icon-btn" style="background: var(--primary-teal); color: white; border: none; height: 38px;" onclick="addMedicationFromInput()">
+                  + Add Drug
+                </button>
+              </div>
+            </div>
+
+            <div style="margin-top: 24px;">
+              <h3>Multi-Drug Interaction Analysis</h3>
+              <p style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 8px;">Select drugs to evaluate potential pharmacological conflicts:</p>
+              <div id="interactionCheckboxes" style="display: flex; flex-direction: column; gap: 6px; max-height: 160px; overflow-y: auto;"></div>
+              <button class="icon-btn" style="margin-top: 12px; width: 100%; justify-content: center; background: rgba(6, 182, 212, 0.15); border-color: var(--accent-cyan); color: var(--accent-cyan);" onclick="analyzeSelectedInteractions()">
+                🔬 Run Clinical Interaction Analysis
+              </button>
+            </div>
+          </div>
+
+          <div class="meds-card-box">
+            <h3>My Active Prescription Cabinet (<span id="cabinetCount">0</span>)</h3>
+            <div class="cabinet-list" id="cabinetListContainer" style="margin-top: 12px;"></div>
+            <div id="interactionAlertOutput" style="display: none;"></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- TAB 3: Body & Symptom Visualizer -->
+      <section class="tab-content" id="tab-symptoms">
+        <div class="section-title-row">
+          <div>
+            <h2>Interactive Body Region & Symptom Triage Tool</h2>
+            <p style="font-size:0.85rem; color:var(--text-muted);">Select body regions to isolate symptoms, rate pain levels, and receive automated clinical triage suggestions.</p>
+          </div>
+        </div>
+
+        <div class="body-map-container">
+          <div>
+            <h3>1. Select Affected Body Area</h3>
+            <div class="body-regions-grid" id="bodyRegionsContainer" style="margin-top: 12px;"></div>
+
+            <div style="margin-top: 20px;">
+              <h3>2. Select Associated Symptoms</h3>
+              <div id="symptomsChecklistContainer" style="display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px;">
+                <p style="font-size: 0.85rem; color: var(--text-muted);">Select a body region above to display symptoms.</p>
+              </div>
+            </div>
+
+            <div class="pain-scale-group" style="margin-top: 24px;">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                <label style="font-size: 0.9rem; font-weight: 600;">Pain Severity Scale (1 - 10):</label>
+                <span id="painValueLabel" style="font-weight: 700; color: var(--accent-cyan); font-size: 1.1rem;">5 / 10 (Moderate)</span>
+              </div>
+              <input type="range" min="1" max="10" value="5" class="range-slider" id="painSlider" oninput="updatePainLabel(this.value)">
+            </div>
+
+            <button class="icon-btn" style="width: 100%; justify-content: center; background: linear-gradient(135deg, var(--primary-teal), var(--accent-cyan)); color: white; padding: 12px; font-size: 1rem;" onclick="generateTriageFromVisualizer()">
+              🩺 Generate Clinical Assessment
+            </button>
+          </div>
+
+          <div class="meds-card-box" id="triageResultBox">
+            <h3>Clinical Triage Assessment</h3>
+            <div style="margin-top: 12px; color: var(--text-muted); font-size: 0.88rem;" id="triageResultContent">
+              Select body areas and symptoms on the left to run an automated triage assessment.
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- TAB 4: Health Vitals & Metric Tracker -->
+      <section class="tab-content" id="tab-vitals">
+        <div class="section-title-row">
+          <div>
+            <h2>Health Vitals & Biometric Tracker</h2>
+            <p style="font-size:0.85rem; color:var(--text-muted);">Log biometrics, track physiological trends, and keep records for your medical provider.</p>
+          </div>
+        </div>
+
+        <div class="vitals-grid">
+          <div class="vital-card">
+            <div style="font-size: 24px;">❤️</div>
+            <div style="font-size: 0.85rem; color: var(--text-muted);">Heart Rate</div>
+            <div class="vital-value" id="valHeartRate">72 <span style="font-size:0.9rem;">BPM</span></div>
+            <div style="font-size: 0.75rem; color: var(--severity-safe);">Normal Resting</div>
+          </div>
+
+          <div class="vital-card">
+            <div style="font-size: 24px;">🩸</div>
+            <div style="font-size: 0.85rem; color: var(--text-muted);">Blood Pressure</div>
+            <div class="vital-value" id="valBp">120/80 <span style="font-size:0.9rem;">mmHg</span></div>
+            <div style="font-size: 0.75rem; color: var(--severity-safe);">Optimal Range</div>
+          </div>
+
+          <div class="vital-card">
+            <div style="font-size: 24px;">🫁</div>
+            <div style="font-size: 0.85rem; color: var(--text-muted);">Blood Oxygen</div>
+            <div class="vital-value" id="valSpo2">98 <span style="font-size:0.9rem;">%</span></div>
+            <div style="font-size: 0.75rem; color: var(--severity-safe);">Normal Oxygenation</div>
+          </div>
+
+          <div class="vital-card">
+            <div style="font-size: 24px;">🌡️</div>
+            <div style="font-size: 0.85rem; color: var(--text-muted);">Temperature</div>
+            <div class="vital-value" id="valTemp">98.6 <span style="font-size:0.9rem;">°F</span></div>
+            <div style="font-size: 0.75rem; color: var(--severity-safe);">Afebrile</div>
+          </div>
+        </div>
+
+        <div class="meds-card-box">
+          <h3>Update Vitals Log</h3>
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 12px; margin-top: 14px;">
+            <div>
+              <label style="font-size: 0.78rem; color: var(--text-muted);">Heart Rate (BPM)</label>
+              <input type="number" class="med-search-input" id="inputBpm" placeholder="72">
+            </div>
+            <div>
+              <label style="font-size: 0.78rem; color: var(--text-muted);">Systolic (mmHg)</label>
+              <input type="number" class="med-search-input" id="inputSys" placeholder="120">
+            </div>
+            <div>
+              <label style="font-size: 0.78rem; color: var(--text-muted);">Diastolic (mmHg)</label>
+              <input type="number" class="med-search-input" id="inputDia" placeholder="80">
+            </div>
+            <div>
+              <label style="font-size: 0.78rem; color: var(--text-muted);">SpO2 (%)</label>
+              <input type="number" class="med-search-input" id="inputSpo2" placeholder="98">
+            </div>
+            <div>
+              <label style="font-size: 0.78rem; color: var(--text-muted);">Temp (°F)</label>
+              <input type="number" step="0.1" class="med-search-input" id="inputTemp" placeholder="98.6">
+            </div>
+          </div>
+          <button class="icon-btn" style="margin-top: 12px; background: var(--primary-teal); color: white; border: none; padding: 10px 20px;" onclick="saveVitalsLog()">
+            💾 Update Vitals Record
+          </button>
+        </div>
+      </section>
+
+      <!-- TAB 5: Emergency SOS & Care Locator -->
+      <section class="tab-content" id="tab-emergency">
+        <div style="background: rgba(239, 68, 68, 0.15); border: 1px solid rgba(239, 68, 68, 0.4); border-radius: var(--radius-lg); padding: 20px; text-align: center; margin-bottom: 20px;">
+          <h2 style="color: #fca5a5; font-size: 1.5rem;">🚨 Medical Emergency Alert Hotline</h2>
+          <p style="font-size: 0.9rem; color: #fecaca; margin-top: 6px;">If you or someone around you is experiencing life-threatening symptoms, act immediately!</p>
+          <div style="display: flex; justify-content: center; gap: 16px; margin-top: 16px; flex-wrap: wrap;">
+            <a href="tel:911" class="icon-btn sos-btn-pulse" style="padding: 12px 24px; font-size: 1.1rem; text-decoration: none;">📞 Call 911 (US Emergency)</a>
+            <a href="tel:112" class="icon-btn" style="background: rgba(239, 68, 68, 0.3); border-color: red; color: white; padding: 12px 24px; font-size: 1.1rem; text-decoration: none;">📞 Call 112 (EU / Global)</a>
+            <a href="tel:18002221222" class="icon-btn" style="background: rgba(234, 179, 8, 0.2); border-color: gold; color: #fde047; padding: 12px 24px; font-size: 0.95rem; text-decoration: none;">🧪 Poison Control Hotline</a>
+            <a href="tel:988" class="icon-btn" style="background: rgba(59, 130, 246, 0.2); border-color: #3b82f6; color: #93c5fd; padding: 12px 24px; font-size: 0.95rem; text-decoration: none;">🧠 988 Suicide & Crisis Lifeline</a>
+          </div>
+        </div>
+
+        <div class="meds-card-box">
+          <h3>📍 Simulated Nearby Urgent Care & ER Locator</h3>
+          <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 12px;">Real-time estimated distance and emergency room triage wait times:</p>
+
+          <div style="display: flex; flex-direction: column; gap: 10px;">
+            <div class="cabinet-item">
+              <div>
+                <h4 style="color: var(--text-main);">St. Jude Regional Medical Center - Emergency Dept</h4>
+                <p style="font-size: 0.8rem; color: var(--text-muted);">1.4 miles away • 24/7 Level 1 Trauma Center</p>
+              </div>
+              <div style="text-align: right;">
+                <span class="triage-badge safe">Wait: ~12 mins</span>
+              </div>
+            </div>
+            <div class="cabinet-item">
+              <div>
+                <h4 style="color: var(--text-main);">Mercy Urgent Care Clinic</h4>
+                <p style="font-size: 0.8rem; color: var(--text-muted);">2.8 miles away • Open until 10:00 PM</p>
+              </div>
+              <div style="text-align: right;">
+                <span class="triage-badge moderate">Wait: ~25 mins</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+    </main>
+  </div>
+
+  <!-- Switch / Add Patient Profile Modal -->
+  <div class="modal-overlay" id="patientModal">
+    <div class="modal-content">
+      <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--panel-border); padding-bottom: 12px;">
+        <h3>👤 Patient Profile Manager</h3>
+        <button class="icon-btn" onclick="closePatientModal()">✕</button>
+      </div>
+
+      <div style="margin-top: 14px;">
+        <label style="font-size: 0.8rem; color: var(--text-muted);">Select Active Patient Profile:</label>
+        <select class="med-search-input" id="patientSelectDropdown" onchange="switchPatientFromDropdown(this.value)">
+          <!-- Populated dynamically -->
+        </select>
+
+        <hr style="border-color: var(--panel-border); margin: 16px 0;">
+
+        <h4>➕ Create New Patient Profile</h4>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px;">
+          <div>
+            <label style="font-size: 0.78rem; color: var(--text-muted);">Full Name</label>
+            <input type="text" class="med-search-input" id="newPatientName" placeholder="e.g. Emma Watson">
+          </div>
+          <div>
+            <label style="font-size: 0.78rem; color: var(--text-muted);">Age</label>
+            <input type="number" class="med-search-input" id="newPatientAge" placeholder="28">
+          </div>
+          <div>
+            <label style="font-size: 0.78rem; color: var(--text-muted);">Gender</label>
+            <select class="med-search-input" id="newPatientGender">
+              <option value="Male">Male</option>
+              <option value="Female">Female</option>
+              <option value="Other">Other</option>
+            </select>
+          </div>
+          <div>
+            <label style="font-size: 0.78rem; color: var(--text-muted);">Known Allergies</label>
+            <input type="text" class="med-search-input" id="newPatientAllergies" placeholder="e.g. Sulfa, Peanuts">
+          </div>
+        </div>
+        <div>
+          <label style="font-size: 0.78rem; color: var(--text-muted);">Pre-existing Chronic Conditions</label>
+          <input type="text" class="med-search-input" id="newPatientConditions" placeholder="e.g. Hypertension, Diabetes">
+        </div>
+
+        <button class="icon-btn" style="margin-top: 12px; width: 100%; justify-content: center; background: var(--primary-teal); color: white; border: none; padding: 10px;" onclick="createNewPatientProfile()">
+          💾 Save & Switch to New Profile
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Medical Report Export Modal -->
+  <div class="modal-overlay" id="reportModal">
+    <div class="modal-content">
+      <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--panel-border); padding-bottom: 12px;">
+        <h3>📄 Doctor Visit Medical Summary Report</h3>
+        <button class="icon-btn" onclick="closeReportModal()">✕</button>
+      </div>
+      <div id="reportPrintArea" style="padding: 16px 0; font-size: 0.9rem; line-height: 1.6;"></div>
+      <div style="display: flex; justify-content: flex-end; gap: 12px; border-top: 1px solid var(--panel-border); padding-top: 12px;">
+        <button class="icon-btn" onclick="window.print()">🖨️ Print / Save as PDF</button>
+        <button class="icon-btn" style="background: var(--primary-teal); color: white; border: none;" onclick="closeReportModal()">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Emergency Red Flag Alert Modal -->
+  <div class="modal-overlay" id="emergencyModal">
+    <div class="modal-content" style="border-color: #ef4444; background: #1c0a0a;">
+      <div style="text-align: center; padding: 12px;">
+        <div style="font-size: 48px;">🚨</div>
+        <h2 style="color: #fca5a5; font-size: 1.6rem; margin-top: 8px;">EMERGENCY RED FLAG DETECTED</h2>
+        <p style="font-size: 0.95rem; color: #fecaca; margin-top: 10px;" id="emergencyModalText">
+          Your input contains signs associated with a potentially life-threatening medical emergency.
+        </p>
+        <div style="display: flex; justify-content: center; gap: 12px; margin-top: 16px;">
+          <a href="tel:911" class="icon-btn sos-btn-pulse" style="padding: 10px 20px; text-decoration: none;">📞 Dial 911 Now</a>
+          <button class="icon-btn" onclick="document.getElementById('emergencyModal').classList.remove('active')">Dismiss Alert</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- EMBEDDED JAVASCRIPT LOGIC & KNOWLEDGE BASE -->
+  <script>
+    const RED_FLAG_KEYWORDS = [
+      "chest pain", "crushing chest", "pressure in chest", "shortness of breath", "can't breathe",
+      "slurred speech", "facial drooping", "arm weakness", "numbness on one side", "stroke",
+      "coughing blood", "vomiting blood", "bluish lips", "loss of consciousness", "fainted",
+      "severe sudden headache", "thunderclap headache", "anaphylaxis", "throat swelling",
+      "thoughts of suicide", "self harm", "overdose", "poisoning"
+    ];
+
+    const MEDICATIONS_DATABASE = [
+      {
+        id: "med-1",
+        name: "Aspirin",
+        genericName: "Acetylsalicylic Acid",
+        category: "NSAID / Antiplatelet",
+        commonDosage: "81mg - 325mg daily",
+        uses: "Pain relief, anti-inflammatory, fever reduction, blood clot prevention.",
+        sideEffects: ["Upset stomach", "Heartburn", "Increased bleeding risk", "Tinnitus"],
+        warnings: "Do not take if you have active stomach ulcers or bleeding disorders."
+      },
+      {
+        id: "med-2",
+        name: "Ibuprofen",
+        genericName: "Ibuprofen",
+        category: "NSAID",
+        commonDosage: "200mg - 400mg every 4-6 hours",
+        uses: "Inflammation, fever, headache, muscle pain, arthritis.",
+        sideEffects: ["Nausea", "Stomach pain", "Dizziness", "Fluid retention"],
+        warnings: "May increase cardiovascular risk and cause GI ulceration if used long-term."
+      },
+      {
+        id: "med-3",
+        name: "Acetaminophen",
+        genericName: "Paracetamol / Tylenol",
+        category: "Analgesic / Antipyretic",
+        commonDosage: "325mg - 500mg every 4-6 hours",
+        uses: "Mild to moderate pain, fever reducer.",
+        sideEffects: ["Rare at normal doses", "Nausea", "Rash"],
+        warnings: "Overdose can cause severe liver damage. Avoid combining multiple products containing acetaminophen."
+      },
+      {
+        id: "med-4",
+        name: "Lisinopril",
+        genericName: "Lisinopril",
+        category: "ACE Inhibitor",
+        commonDosage: "10mg - 40mg once daily",
+        uses: "High blood pressure (Hypertension), heart failure.",
+        sideEffects: ["Dry persistent cough", "Dizziness", "Elevated potassium"],
+        warnings: "Do not use during pregnancy. Watch for signs of angioedema."
+      },
+      {
+        id: "med-5",
+        name: "Metformin",
+        genericName: "Metformin Hydrochloride",
+        category: "Antidiabetic",
+        commonDosage: "500mg - 1000mg twice daily with meals",
+        uses: "Type 2 Diabetes glycemic control.",
+        sideEffects: ["Diarrhea", "Nausea", "Abdominal discomfort"],
+        warnings: "Risk of lactic acidosis. Take with food to reduce GI symptoms."
+      },
+      {
+        id: "med-6",
+        name: "Warfarin",
+        genericName: "Warfarin Sodium (Coumadin)",
+        category: "Anticoagulant (Blood Thinner)",
+        commonDosage: "2mg - 10mg daily",
+        uses: "Prevention of DVT, pulmonary embolism, atrial fibrillation clot risk.",
+        sideEffects: ["Easy bruising", "Bleeding gums", "Minor nosebleeds"],
+        warnings: "High bleeding hazard! Requires regular INR monitoring."
+      },
+      {
+        id: "med-7",
+        name: "Sertraline",
+        genericName: "Sertraline (Zoloft)",
+        category: "SSRI Antidepressant",
+        commonDosage: "50mg - 100mg once daily",
+        uses: "Depression, anxiety disorders, PTSD, OCD.",
+        sideEffects: ["Insomnia", "Nausea", "Dry mouth", "Drowsiness"],
+        warnings: "Do not discontinue abruptly. Risk of Serotonin Syndrome when combined with serotonergic drugs."
+      },
+      {
+        id: "med-8",
+        name: "Omeprazole",
+        genericName: "Omeprazole (Prilosec)",
+        category: "Proton Pump Inhibitor (PPI)",
+        commonDosage: "20mg - 40mg once daily",
+        uses: "GERD, acid reflux, stomach ulcers.",
+        sideEffects: ["Headache", "Abdominal pain", "Gas"],
+        warnings: "Long-term use may increase risk of bone fractures and intestinal infections."
+      },
+      {
+        id: "med-9",
+        name: "Amoxicillin",
+        genericName: "Amoxicillin Trihydrate",
+        category: "Penicillin Antibiotic",
+        commonDosage: "250mg - 500mg every 8 hours",
+        uses: "Bacterial infections (sinusitis, strep throat, UTI).",
+        sideEffects: ["Diarrhea", "Rash", "Nausea"],
+        warnings: "Ineffective against viral infections (flu/cold). Discontinue if allergic hives occur."
+      },
+      {
+        id: "med-10",
+        name: "Atorvastatin",
+        genericName: "Atorvastatin (Lipitor)",
+        category: "Statin",
+        commonDosage: "10mg - 80mg once daily",
+        uses: "High cholesterol, cardiovascular risk reduction.",
+        sideEffects: ["Muscle aches", "Joint pain"],
+        warnings: "Report severe unexpected muscle weakness or dark urine."
+      }
+    ];
+
+    const DRUG_INTERACTIONS = [
+      {
+        drug1: "Aspirin",
+        drug2: "Ibuprofen",
+        severity: "High",
+        effect: "Increased Gastrointestinal Bleeding Risk & Attenuated Antiplatelet Action",
+        description: "Taking Ibuprofen concurrently with Aspirin may diminish the cardioprotective effect of low-dose Aspirin and significantly heighten stomach ulcer risks.",
+        recommendation: "Avoid co-administration. If both are necessary, take Aspirin at least 30 minutes before or 8 hours after Ibuprofen."
+      },
+      {
+        drug1: "Warfarin",
+        drug2: "Aspirin",
+        severity: "Critical",
+        effect: "Severe Hemorrhage & Bleeding Hazard",
+        description: "Combining anticoagulants (Warfarin) with antiplatelet NSAIDs (Aspirin) synergistically impairs blood clotting.",
+        recommendation: "Strictly avoid unless specifically prescribed and monitored closely by a hematologist."
+      },
+      {
+        drug1: "Warfarin",
+        drug2: "Ibuprofen",
+        severity: "Critical",
+        effect: "Severe Gastrointestinal Bleeding",
+        description: "Ibuprofen inhibits blood platelets and irritates stomach mucosal lining, amplifying Warfarin's blood thinning effects.",
+        recommendation: "Avoid NSAIDs like Ibuprofen while taking Warfarin."
+      },
+      {
+        drug1: "Sertraline",
+        drug2: "Ibuprofen",
+        severity: "Moderate",
+        effect: "Increased Upper Gastrointestinal Bleeding",
+        description: "SSRIs like Sertraline inhibit serotonin reuptake in platelets, which combined with NSAID stomach irritation increases bleeding risk.",
+        recommendation: "Use with caution. Report any black tarry stools."
+      },
+      {
+        drug1: "Lisinopril",
+        drug2: "Ibuprofen",
+        severity: "Moderate",
+        effect: "Reduced Antihypertensive Effect & Kidney Stress",
+        description: "NSAIDs cause fluid retention and constrict renal blood vessels, counteracting Lisinopril's blood pressure lowering action.",
+        recommendation: "Monitor blood pressure regularly."
+      }
+    ];
+
+    const SYMPTOM_KNOWLEDGE_BASE = {
+      headache: {
+        title: "Headache / Cephalgia",
+        triageScore: "Low-Moderate",
+        differentials: [
+          { name: "Tension Headache", probability: "65%", status: "Common" },
+          { name: "Migraine", probability: "25%", status: "Moderate" }
+        ],
+        advice: [
+          "Stay hydrated (drink 500-1000ml water).",
+          "Rest in a quiet, dimmed room.",
+          "Consider OTC analgesics like Acetaminophen or Ibuprofen if not contraindicated."
+        ]
+      },
+      chest_pain: {
+        title: "Chest Pain / Thoracic Discomfort",
+        triageScore: "EMERGENCY / HIGH RISK",
+        differentials: [
+          { name: "Acute Coronary Syndrome", probability: "High Risk", status: "Critical Emergency" },
+          { name: "Gastroesophageal Reflux (GERD)", probability: "Moderate", status: "Non-Emergency" }
+        ],
+        advice: [
+          "🚨 IF PAIN IS RADIATING OR ACCOMPANIED BY BREATHLESSNESS, CALL EMERGENCY 911 IMMEDIATELY.",
+          "Sit upright, remain calm, and unbutton tight clothing."
+        ]
+      },
+      fever: {
+        title: "Fever / Pyrexia",
+        triageScore: "Moderate",
+        differentials: [
+          { name: "Viral Upper Respiratory Infection", probability: "60%", status: "Self-limiting" },
+          { name: "Bacterial Infection", probability: "30%", status: "Requires Evaluation" }
+        ],
+        advice: [
+          "Drink plentiful fluids.",
+          "Take antipyretics like Acetaminophen or Ibuprofen as appropriate.",
+          "Get plenty of physical rest."
+        ]
+      }
+    };
+
+    const BODY_REGIONS = [
+      { id: "head", name: "Head & Neck", icon: "🧠", symptoms: ["Headache", "Dizziness", "Sore Throat", "Neck Stiffness"] },
+      { id: "chest", name: "Chest & Respiratory", icon: "🫁", symptoms: ["Chest Pressure / Pain", "Shortness of Breath", "Persistent Cough"] },
+      { id: "abdomen", name: "Abdomen & GI", icon: "🩺", symptoms: ["Stomach Cramps", "Nausea", "Acid Reflux", "Diarrhea"] },
+      { id: "musculoskeletal", name: "Musculoskeletal", icon: "🦴", symptoms: ["Lower Back Pain", "Joint Stiffness", "Muscle Spasms"] },
+      { id: "skin", name: "Skin & Dermatological", icon: "🩸", symptoms: ["Rash or Hives", "Itching", "Unexplained Bruising"] },
+      { id: "mental", name: "Mental Health", icon: "💭", symptoms: ["Anxiety & Panic", "Depressed Mood", "Insomnia"] }
+    ];
+
+    const QUICK_PROMPTS = [
+      { label: "💊 Check Drug Interaction", query: "Can I take Aspirin and Ibuprofen together?" },
+      { label: "🩺 Symptom Analysis", query: "I have a severe headache, mild fever, and sensitive eyes." },
+      { label: "🫀 Chest Pain Triage", query: "I am experiencing tightness in my chest when I exercise." },
+      { label: "🌿 GERD & Acid Reflux", query: "What are safe treatments for acid reflux?" }
+    ];
+
+    // Patient Profiles Management State
+    let patientProfiles = [
+      {
+        id: "pat-1",
+        name: "Alex Mercer",
+        age: 34,
+        gender: "Male",
+        allergies: ["Penicillin"],
+        conditions: ["Asthma"],
+        currentMeds: ["Lisinopril 10mg"]
+      },
+      {
+        id: "pat-2",
+        name: "Sarah Jenkins",
+        age: 62,
+        gender: "Female",
+        allergies: ["Sulfa Drugs"],
+        conditions: ["Type 2 Diabetes", "Hypertension"],
+        currentMeds: ["Metformin 500mg", "Aspirin 81mg"]
+      }
+    ];
+    let activePatient = patientProfiles[0];
+
+    // Application State
+    let activeTab = "tab-chat";
+    let isRecording = false;
+    let speechRecognition = null;
+    let patientCabinet = [
+      { id: "med-1", name: "Aspirin", genericName: "Acetylsalicylic Acid", dosage: "81mg daily" },
+      { id: "med-4", name: "Lisinopril", genericName: "Lisinopril", dosage: "10mg daily" }
+    ];
+    let selectedBodyRegion = null;
+    let currentVitals = { bpm: 72, sys: 120, dia: 80, spo2: 98, temp: 98.6 };
+    let chatHistory = [];
+
+    document.addEventListener("DOMContentLoaded", () => {
+      renderPatientProfile();
+      renderQuickPrompts();
+      populateMedsDatalist();
+      renderCabinetList();
+      renderCabinetCheckboxes();
+      renderBodyRegions();
+      initVoiceRecognition();
+    });
+
+    // -------------------------------------------------------------
+    // PATIENT PROFILE MANAGEMENT
+    // -------------------------------------------------------------
+
+    function renderPatientProfile() {
+      document.getElementById("patientNameDisplay").innerText = activePatient.name;
+      document.getElementById("patientMetaDisplay").innerText = `${activePatient.gender}, ${activePatient.age} yrs • ID: #${activePatient.id}`;
+      
+      const activeWelcomeEl = document.getElementById("activePatientWelcome");
+      if (activeWelcomeEl) {
+        activeWelcomeEl.innerText = `${activePatient.name} (${activePatient.age} yrs, ${activePatient.gender})`;
+      }
+
+      const tagsContainer = document.getElementById("patientTagsDisplay");
+      const tags = [
+        ...activePatient.allergies.map(a => `<span class="tag-badge allergy">${a} Allergy</span>`),
+        ...activePatient.conditions.map(c => `<span class="tag-badge">${c}</span>`),
+        ...activePatient.currentMeds.map(m => `<span class="tag-badge">${m}</span>`)
+      ];
+      tagsContainer.innerHTML = tags.join('');
+    }
+
+    function openPatientModal() {
+      const dropdown = document.getElementById("patientSelectDropdown");
+      dropdown.innerHTML = patientProfiles.map(p => `
+        <option value="${p.id}" ${p.id === activePatient.id ? 'selected' : ''}>
+          ${p.name} (${p.gender}, ${p.age} yrs)
+        </option>
+      `).join('');
+      document.getElementById("patientModal").classList.add("active");
+    }
+
+    function closePatientModal() {
+      document.getElementById("patientModal").classList.remove("active");
+    }
+
+    function switchPatientFromDropdown(patientId) {
+      const found = patientProfiles.find(p => p.id === patientId);
+      if (found) {
+        activePatient = found;
+        renderPatientProfile();
+        closePatientModal();
+        appendChatMessage(`Switched active patient profile to **${activePatient.name}** (${activePatient.age} yrs, ${activePatient.gender}, Allergies: ${activePatient.allergies.join(", ") || "None"}).`, "ai");
+      }
+    }
+
+    function createNewPatientProfile() {
+      const name = document.getElementById("newPatientName").value.trim();
+      const age = document.getElementById("newPatientAge").value.trim();
+      const gender = document.getElementById("newPatientGender").value;
+      const allergiesInput = document.getElementById("newPatientAllergies").value.trim();
+      const conditionsInput = document.getElementById("newPatientConditions").value.trim();
+
+      if (!name || !age) {
+        alert("Please enter patient name and age.");
+        return;
+      }
+
+      const newPatient = {
+        id: "pat-" + (patientProfiles.length + 1),
+        name: name,
+        age: parseInt(age),
+        gender: gender,
+        allergies: allergiesInput ? allergiesInput.split(',').map(s => s.trim()) : [],
+        conditions: conditionsInput ? conditionsInput.split(',').map(s => s.trim()) : [],
+        currentMeds: []
+      };
+
+      patientProfiles.push(newPatient);
+      activePatient = newPatient;
+      renderPatientProfile();
+
+      document.getElementById("newPatientName").value = "";
+      document.getElementById("newPatientAge").value = "";
+      document.getElementById("newPatientAllergies").value = "";
+      document.getElementById("newPatientConditions").value = "";
+
+      closePatientModal();
+      appendChatMessage(`Created and activated new patient profile for **${newPatient.name}** (${newPatient.age} yrs, ${newPatient.gender}).`, "ai");
+    }
+
+    // -------------------------------------------------------------
+    // MEDICINE EXPLORER & DRUG SEARCH HELPER
+    // -------------------------------------------------------------
+
+    function searchMedicineDetails(query) {
+      const container = document.getElementById("medQueryResultArea");
+      if (!query.trim()) {
+        container.innerHTML = "";
+        return;
+      }
+
+      const matches = MEDICATIONS_DATABASE.filter(m =>
+        m.name.toLowerCase().includes(query.toLowerCase()) ||
+        m.genericName.toLowerCase().includes(query.toLowerCase()) ||
+        m.category.toLowerCase().includes(query.toLowerCase())
+      );
+
+      if (matches.length === 0) {
+        container.innerHTML = `
+          <div style="background:rgba(255,255,255,0.03); padding:10px; border-radius:8px; font-size:0.85rem; color:var(--text-muted); margin-top:8px;">
+            No exact match found in database for "${query}". You can ask the AI Chatbot directly!
+            <button class="icon-btn" style="margin-top:6px; font-size:0.78rem;" onclick="askChatbotAboutDrug('${query}')">💬 Ask AI Chatbot About '${query}'</button>
+          </div>
+        `;
+        return;
+      }
+
+      container.innerHTML = matches.map(med => `
+        <div style="background:rgba(15,23,42,0.95); border:1px solid var(--panel-border); border-radius:10px; padding:12px; margin-top:8px;">
+          <div style="display:flex; justify-content:space-between; align-items:center;">
+            <div>
+              <strong style="color:var(--accent-cyan); font-size:0.98rem;">${med.name}</strong>
+              <span style="font-size:0.75rem; color:var(--text-muted); margin-left:6px;">(${med.genericName})</span>
+            </div>
+            <span class="tag-badge">${med.category}</span>
+          </div>
+          <p style="font-size:0.8rem; color:var(--text-muted); margin-top:4px;"><strong>Uses:</strong> ${med.uses}</p>
+          <p style="font-size:0.8rem; color:var(--text-muted);"><strong>Dosage:</strong> ${med.commonDosage}</p>
+          <p style="font-size:0.78rem; color:#fca5a5; margin-top:4px;">⚠️ <strong>Warning:</strong> ${med.warnings}</p>
+          
+          <div style="display:flex; gap:8px; margin-top:10px; flex-wrap:wrap;">
+            <button class="icon-btn" style="font-size:0.78rem; background:rgba(6,182,212,0.2); border-color:var(--accent-cyan); color:var(--accent-cyan);" onclick="askChatbotAboutDrug('${med.name}')">
+              💬 Ask AI About ${med.name}
+            </button>
+            <button class="icon-btn" style="font-size:0.78rem;" onclick="appendToExistingPrompt('${med.name}')">
+              ➕ Append '${med.name}' to Chat Input
+            </button>
+            <button class="icon-btn" style="font-size:0.78rem; background:var(--primary-teal); color:white; border:none;" onclick="addDrugToCabinetDirect('${med.name}', '${med.commonDosage}')">
+              💊 Add to Cabinet
+            </button>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function appendToExistingPrompt(textToAppend) {
+      const inputEl = document.getElementById("userInput");
+      if (!inputEl.value.trim()) {
+        inputEl.value = `Can you analyze ${textToAppend.trim()}?`;
+      } else {
+        inputEl.value += ` ${textToAppend.trim()}`;
+      }
+      switchTab('tab-chat');
+      inputEl.focus();
+    }
+
+    function askChatbotAboutDrug(drugName) {
+      const inputEl = document.getElementById("userInput");
+      inputEl.value = `Please explain ${drugName} (uses, dosage, side effects) and check for any potential interactions with my active profile (${activePatient.name}, Allergies: ${activePatient.allergies.join(", ") || "None"}).`;
+      switchTab('tab-chat');
+      sendMessage();
+    }
+
+    function addDrugToCabinetDirect(name, dosage) {
+      patientCabinet.push({
+        id: "med-" + Date.now(),
+        name: name,
+        genericName: name,
+        dosage: dosage
+      });
+      renderCabinetList();
+      renderCabinetCheckboxes();
+      checkCabinetInteractions();
+      alert(`Added ${name} to active prescription cabinet!`);
+    }
+
+    // -------------------------------------------------------------
+    // CHATBOT ENGINE & NAVIGATION
+    // -------------------------------------------------------------
+
+    function switchTab(tabId) {
+      activeTab = tabId;
+      document.querySelectorAll(".tab-content").forEach(el => el.classList.remove("active"));
+      document.querySelectorAll(".nav-tab-btn").forEach(el => el.classList.remove("active"));
+
+      const targetTab = document.getElementById(tabId);
+      const targetNav = document.getElementById("nav-" + tabId);
+
+      if (targetTab) targetTab.classList.add("active");
+      if (targetNav) targetNav.classList.add("active");
+    }
+
+    function toggleTheme() {
+      const currentTheme = document.documentElement.getAttribute("data-theme");
+      const newTheme = currentTheme === "dark" ? "light" : "dark";
+      document.documentElement.setAttribute("data-theme", newTheme);
+      document.getElementById("themeToggleBtn").innerHTML = newTheme === "dark" ? "<span>🌙</span>" : "<span>☀️</span>";
+    }
+
+    function checkDrugInteractions(drugList) {
+      if (!drugList || drugList.length < 2) return [];
+      const foundInteractions = [];
+
+      for (let i = 0; i < drugList.length; i++) {
+        for (let j = i + 1; j < drugList.length; j++) {
+          const d1 = drugList[i].toLowerCase();
+          const d2 = drugList[j].toLowerCase();
+
+          DRUG_INTERACTIONS.forEach(inter => {
+            const i1 = inter.drug1.toLowerCase();
+            const i2 = inter.drug2.toLowerCase();
+            if ((d1.includes(i1) && d2.includes(i2)) || (d1.includes(i2) && d2.includes(i1))) {
+              foundInteractions.push(inter);
+            }
+          });
+        }
+      }
+      return foundInteractions;
+    }
+
+    function detectRedFlags(userText) {
+      const lower = userText.toLowerCase();
+      return RED_FLAG_KEYWORDS.filter(kw => lower.includes(kw));
+    }
+
+    function renderQuickPrompts() {
+      const container = document.getElementById("quickPromptsContainer");
+      if (!container) return;
+      container.innerHTML = QUICK_PROMPTS.map(p => `
+        <button class="prompt-chip" onclick="useQuickPrompt('${p.query.replace(/'/g, "\\'")}')">
+          ${p.label}
+        </button>
+      `).join('');
+    }
+
+    function useQuickPrompt(text) {
+      document.getElementById("userInput").value = text;
+      sendMessage();
+    }
+
+    function handleKeyPress(e) {
+      if (e.key === "Enter") sendMessage();
+    }
+
+    function sendMessage() {
+      const inputEl = document.getElementById("userInput");
+      const text = inputEl.value.trim();
+      if (!text) return;
+
+      appendChatMessage(text, "user");
+      inputEl.value = "";
+
+      const redFlags = detectRedFlags(text);
+      if (redFlags.length > 0) {
+        showEmergencyAlert(redFlags);
+      }
+
+      setTimeout(() => {
+        generateAIResponse(text, redFlags);
+      }, 500);
+    }
+
+    function appendChatMessage(content, sender, cardHtml = "") {
+      const area = document.getElementById("messagesArea");
+      const bubble = document.createElement("div");
+      bubble.className = `chat-bubble ${sender}-msg`;
+
+      const avatar = sender === "user" ? "👤" : "🩺";
+      const speechBtn = sender === "ai" ? `<button style="background:none; border:none; cursor:pointer; font-size:0.8rem; margin-left:8px;" onclick="speakText(this)">🔊</button>` : "";
+
+      bubble.innerHTML = `
+        <div class="avatar-icon">${avatar}</div>
+        <div class="bubble-content">
+          ${content} ${speechBtn}
+          ${cardHtml}
+        </div>
+      `;
+
+      area.appendChild(bubble);
+      area.scrollTop = area.scrollHeight;
+      chatHistory.push({ sender, text: content, timestamp: new Date().toLocaleTimeString() });
+    }
+
+    function generateAIResponse(userText, redFlags) {
+      const lower = userText.toLowerCase();
+
+      const detectedMedsInQuery = MEDICATIONS_DATABASE.filter(m => 
+        lower.includes(m.name.toLowerCase()) || lower.includes(m.genericName.toLowerCase())
+      );
+
+      let responseHtml = "";
+      let responseText = "";
+
+      if (redFlags.length > 0) {
+        responseText = `⚠️ **CRITICAL RED FLAG DETECTED**: Your query mentions "${redFlags.join(", ")}". This requires immediate emergency medical evaluation.`;
+        responseHtml = `
+          <div class="response-card" style="border-color: #ef4444; background: rgba(239,68,68,0.1);">
+            <div class="response-header">
+              <strong style="color: #fca5a5;">EMERGENCY RED FLAG ALERT</strong>
+              <span class="triage-badge emergency">Immediate Emergency</span>
+            </div>
+            <p style="font-size:0.85rem; color:#fecaca; margin-bottom:8px;">Symptoms like <strong>${redFlags.join(", ")}</strong> require urgent evaluation.</p>
+            <ul class="action-checklist">
+              <li>Call Emergency 911 immediately.</li>
+              <li>Remain calm and seated.</li>
+            </ul>
+          </div>
+        `;
+        appendChatMessage(responseText, "ai", responseHtml);
+        return;
+      }
+
+      if (detectedMedsInQuery.length >= 2) {
+        const medNames = detectedMedsInQuery.map(m => m.name);
+        const interactions = checkDrugInteractions(medNames);
+
+        if (interactions.length > 0) {
+          responseText = `I analyzed **${medNames.join(" and ")}** for active patient **${activePatient.name}**. Here is the pharmacological interaction analysis:`;
+          responseHtml = interactions.map(inter => `
+            <div class="response-card" style="border-color: ${inter.severity === 'Critical' ? '#ef4444' : '#f59e0b'};">
+              <div class="response-header">
+                <strong>Interaction: ${inter.drug1} + ${inter.drug2}</strong>
+                <span class="triage-badge ${inter.severity === 'Critical' ? 'emergency' : 'warning'}">${inter.severity} Risk</span>
+              </div>
+              <p style="font-size:0.85rem; color:var(--text-muted); margin-bottom:8px;"><strong>Effect:</strong> ${inter.effect}</p>
+              <p style="font-size:0.82rem; color:var(--text-muted);">${inter.description}</p>
+              <div style="margin-top:10px; padding:8px; background:rgba(0,0,0,0.3); border-radius:6px; font-size:0.8rem; color:var(--accent-cyan);">
+                💡 <strong>Guidance:</strong> ${inter.recommendation}
+              </div>
+            </div>
+          `).join('');
+        } else {
+          responseText = `I analyzed **${medNames.join(" and ")}**. No major documented clinical interactions were found between these specific medications.`;
+          responseHtml = `
+            <div class="response-card">
+              <div class="response-header">
+                <strong>No Severe Interactions Found</strong>
+                <span class="triage-badge safe">Low Risk</span>
+              </div>
+              <p style="font-size:0.85rem; color:var(--text-muted);">Standard recommended dosages may be used if prescribed by your physician.</p>
+            </div>
+          `;
+        }
+        appendChatMessage(responseText, "ai", responseHtml);
+        return;
+      }
+
+      responseText = `Thank you for sharing your query. Based on active patient **${activePatient.name}** (${activePatient.age} yrs, Allergies: ${activePatient.allergies.join(", ") || "None"}), here is general clinical guidance:`;
+      responseHtml = `
+        <div class="response-card">
+          <div class="response-header">
+            <strong>General Health Assessment</strong>
+            <span class="triage-badge safe">Informational</span>
+          </div>
+          <p style="font-size:0.85rem; color:var(--text-muted); margin-bottom:8px;">Ensure adequate hydration and monitor your symptoms. Use our dedicated Medicine Explorer bar to analyze specific drugs.</p>
+        </div>
+      `;
+      appendChatMessage(responseText, "ai", responseHtml);
+    }
+
+    function initVoiceRecognition() {
+      if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
+        const SpeechRec = window.SpeechRecognition || window.webkitSpeechRecognition;
+        speechRecognition = new SpeechRec();
+        speechRecognition.onresult = (event) => {
+          document.getElementById("userInput").value = event.results[0][0].transcript;
+          toggleVoiceInput();
+          sendMessage();
+        };
+        speechRecognition.onerror = () => toggleVoiceInput();
+      }
+    }
+
+    function toggleVoiceInput() {
+      const btn = document.getElementById("micBtn");
+      if (!speechRecognition) { alert("Speech recognition is not supported in this browser."); return; }
+      if (isRecording) {
+        speechRecognition.stop();
+        isRecording = false;
+        btn.classList.remove("recording");
+      } else {
+        speechRecognition.start();
+        isRecording = true;
+        btn.classList.add("recording");
+      }
+    }
+
+    function speakText(btnElement) {
+      if ('speechSynthesis' in window) {
+        window.speechSynthesis.cancel();
+        const utterance = new SpeechSynthesisUtterance(btnElement.parentElement.innerText);
+        window.speechSynthesis.speak(utterance);
+      }
+    }
+
+    function showEmergencyAlert(redFlags) {
+      document.getElementById("emergencyModalText").innerHTML = `Critical emergency terms detected: <strong>"${redFlags.join(", ")}"</strong>. Please call emergency services immediately!`;
+      document.getElementById("emergencyModal").classList.add("active");
+    }
+
+    function clearChatHistory() {
+      if (confirm("Clear chat history?")) {
+        document.getElementById("messagesArea").innerHTML = `
+          <div class="chat-bubble ai-msg">
+            <div class="avatar-icon">🩺</div>
+            <div class="bubble-content">Chat history cleared. How can MediPulse AI assist you?</div>
+          </div>
+        `;
+        chatHistory = [];
+      }
+    }
+
+    function populateMedsDatalist() {
+      const datalist = document.getElementById("medsDatalist");
+      if (!datalist) return;
+      datalist.innerHTML = MEDICATIONS_DATABASE.map(m => `<option value="${m.name}">${m.genericName} (${m.category})</option>`).join('');
+    }
+
+    function addMedicationFromInput() {
+      const nameInput = document.getElementById("medSearchInput");
+      const dosageInput = document.getElementById("medDosageInput");
+      const name = nameInput.value.trim();
+      const dosage = dosageInput.value.trim() || "Standard Dose";
+      if (!name) return;
+
+      const found = MEDICATIONS_DATABASE.find(m => m.name.toLowerCase() === name.toLowerCase());
+      patientCabinet.push({
+        id: "med-" + Date.now(),
+        name: found ? found.name : name,
+        genericName: found ? found.genericName : name,
+        dosage: dosage
+      });
+
+      nameInput.value = "";
+      dosageInput.value = "";
+      renderCabinetList();
+      renderCabinetCheckboxes();
+      checkCabinetInteractions();
+    }
+
+    function deleteCabinetItem(medId) {
+      patientCabinet = patientCabinet.filter(m => m.id !== medId);
+      renderCabinetList();
+      renderCabinetCheckboxes();
+      checkCabinetInteractions();
+    }
+
+    function renderCabinetList() {
+      const container = document.getElementById("cabinetListContainer");
+      document.getElementById("cabinetCount").innerText = patientCabinet.length;
+      if (patientCabinet.length === 0) {
+        container.innerHTML = `<p style="font-size:0.85rem; color:var(--text-muted);">No active prescriptions in cabinet.</p>`;
+        return;
+      }
+      container.innerHTML = patientCabinet.map(item => `
+        <div class="cabinet-item">
+          <div class="cabinet-item-info">
+            <h4>${item.name}</h4>
+            <p>${item.genericName} • ${item.dosage}</p>
+          </div>
+          <button class="delete-med-btn" onclick="deleteCabinetItem('${item.id}')">Remove</button>
+        </div>
+      `).join('');
+    }
+
+    function renderCabinetCheckboxes() {
+      const container = document.getElementById("interactionCheckboxes");
+      if (!container) return;
+      container.innerHTML = MEDICATIONS_DATABASE.map(med => {
+        const isChecked = patientCabinet.some(p => p.name.toLowerCase() === med.name.toLowerCase());
+        return `
+          <label style="font-size:0.82rem; display:flex; align-items:center; gap:6px; cursor:pointer;">
+            <input type="checkbox" value="${med.name}" class="drug-checkbox" ${isChecked ? 'checked' : ''}>
+            ${med.name} <small style="color:var(--text-muted);">(${med.category})</small>
+          </label>
+        `;
+      }).join('');
+    }
+
+    function checkCabinetInteractions() {
+      const cabinetNames = patientCabinet.map(m => m.name);
+      const interactions = checkDrugInteractions(cabinetNames);
+      displayInteractionAlerts(interactions, "Prescription Cabinet Scan");
+    }
+
+    function analyzeSelectedInteractions() {
+      const checkedEls = document.querySelectorAll(".drug-checkbox:checked");
+      const selectedNames = Array.from(checkedEls).map(el => el.value);
+      if (selectedNames.length < 2) {
+        alert("Please select at least 2 medications to run interaction analysis.");
+        return;
+      }
+      const interactions = checkDrugInteractions(selectedNames);
+      displayInteractionAlerts(interactions, "Selected Multi-Drug Scan");
+    }
+
+    function displayInteractionAlerts(interactions, scanTitle) {
+      const outputEl = document.getElementById("interactionAlertOutput");
+      if (!outputEl) return;
+      outputEl.style.display = "block";
+
+      if (interactions.length === 0) {
+        outputEl.innerHTML = `
+          <div class="interaction-alert-box" style="background: rgba(16, 185, 129, 0.12); border-color: rgba(16, 185, 129, 0.4);">
+            <div class="interaction-alert-header" style="color: #34d399;">
+              <span>✓</span> <strong>${scanTitle}: Safe - No Severe Conflicts Detected</strong>
+            </div>
+            <p style="font-size:0.82rem; color:var(--text-muted);">No major contraindications identified among selected medications.</p>
+          </div>
+        `;
+        return;
+      }
+
+      outputEl.innerHTML = interactions.map(inter => `
+        <div class="interaction-alert-box">
+          <div class="interaction-alert-header">
+            <span>⚠️</span> <strong>${scanTitle}: ${inter.severity} Hazard Identified!</strong>
+          </div>
+          <div style="font-size:0.9rem; font-weight:700; color:white; margin-bottom:4px;">${inter.drug1} ⚡ ${inter.drug2}</div>
+          <p style="font-size:0.83rem; color:#fecaca; margin-bottom:6px;"><strong>Clinical Effect:</strong> ${inter.effect}</p>
+          <p style="font-size:0.8rem; color:var(--text-muted);">${inter.description}</p>
+          <div style="margin-top:8px; padding:6px 10px; background:rgba(0,0,0,0.3); border-radius:6px; font-size:0.78rem; color:var(--accent-cyan);">
+            💡 <strong>Guidance:</strong> ${inter.recommendation}
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function renderBodyRegions() {
+      const container = document.getElementById("bodyRegionsContainer");
+      if (!container) return;
+      container.innerHTML = BODY_REGIONS.map(reg => `
+        <div class="body-region-card ${selectedBodyRegion === reg.id ? 'selected' : ''}" onclick="selectBodyRegion('${reg.id}')">
+          <div class="body-region-icon">${reg.icon}</div>
+          <div style="font-weight:600; font-size:0.9rem;">${reg.name}</div>
+        </div>
+      `).join('');
+    }
+
+    function selectBodyRegion(regionId) {
+      selectedBodyRegion = regionId;
+      renderBodyRegions();
+      const regObj = BODY_REGIONS.find(r => r.id === regionId);
+      const checklistContainer = document.getElementById("symptomsChecklistContainer");
+      if (!regObj || !checklistContainer) return;
+
+      checklistContainer.innerHTML = regObj.symptoms.map(sym => `
+        <label style="background:rgba(255,255,255,0.05); border:1px solid var(--panel-border); padding:6px 12px; border-radius:var(--radius-full); font-size:0.82rem; cursor:pointer; display:flex; align-items:center; gap:6px;">
+          <input type="checkbox" value="${sym}" class="symptom-visual-cb">
+          ${sym}
+        </label>
+      `).join('');
+    }
+
+    function updatePainLabel(val) {
+      const label = document.getElementById("painValueLabel");
+      let status = "Mild";
+      let color = "var(--severity-safe)";
+      if (val >= 4 && val <= 6) { status = "Moderate"; color = "var(--severity-warning)"; }
+      else if (val >= 7) { status = "Severe / Acute"; color = "var(--severity-emergency)"; }
+      label.style.color = color;
+      label.innerText = `${val} / 10 (${status})`;
+    }
+
+    function generateTriageFromVisualizer() {
+      const checkedSymptoms = Array.from(document.querySelectorAll(".symptom-visual-cb:checked")).map(c => c.value);
+      const painVal = document.getElementById("painSlider").value;
+      const resultBox = document.getElementById("triageResultContent");
+
+      if (checkedSymptoms.length === 0) {
+        alert("Please select at least one symptom from the checklist.");
+        return;
+      }
+
+      let triageLevel = "Moderate";
+      let badgeClass = "warning";
+      if (painVal >= 8 || checkedSymptoms.includes("Chest Pressure / Pain")) {
+        triageLevel = "EMERGENCY / URGENT";
+        badgeClass = "emergency";
+      } else if (painVal <= 3) {
+        triageLevel = "Low Risk / Self-Care";
+        badgeClass = "safe";
+      }
+
+      resultBox.innerHTML = `
+        <div class="response-header" style="margin-bottom:12px;">
+          <strong>Assessment Summary</strong>
+          <span class="triage-badge ${badgeClass}">${triageLevel}</span>
+        </div>
+        <p style="font-size:0.85rem; margin-bottom:8px;"><strong>Selected Symptoms:</strong> ${checkedSymptoms.join(", ")}</p>
+        <p style="font-size:0.85rem; margin-bottom:12px;"><strong>Pain Intensity:</strong> ${painVal} / 10</p>
+        
+        <div style="background:rgba(0,0,0,0.3); padding:12px; border-radius:8px; margin-bottom:12px;">
+          <strong style="color:var(--accent-cyan); font-size:0.85rem;">Clinical Guidance:</strong>
+          <ul class="action-checklist" style="margin-top:6px;">
+            ${triageLevel.includes('EMERGENCY') ? '<li>Seek immediate evaluation at Urgent Care or ER.</li>' : '<li>Rest, maintain hydration, and monitor symptoms over 24 hrs.</li>'}
+            <li>Schedule follow-up with your physician if symptoms persist.</li>
+          </ul>
+        </div>
+      `;
+    }
+
+    function saveVitalsLog() {
+      const bpm = document.getElementById("inputBpm").value;
+      const sys = document.getElementById("inputSys").value;
+      const dia = document.getElementById("inputDia").value;
+      const spo2 = document.getElementById("inputSpo2").value;
+      const temp = document.getElementById("inputTemp").value;
+
+      if (bpm) { currentVitals.bpm = bpm; document.getElementById("valHeartRate").innerHTML = `${bpm} <span style="font-size:0.9rem;">BPM</span>`; document.getElementById("miniBpm").innerText = `${bpm} BPM`; }
+      if (sys && dia) { currentVitals.sys = sys; currentVitals.dia = dia; document.getElementById("valBp").innerHTML = `${sys}/${dia} <span style="font-size:0.9rem;">mmHg</span>`; document.getElementById("miniBp").innerText = `${sys}/${dia}`; }
+      if (spo2) { currentVitals.spo2 = spo2; document.getElementById("valSpo2").innerHTML = `${spo2} <span style="font-size:0.9rem;">%</span>`; document.getElementById("miniSpo2").innerText = `${spo2}%`; }
+      if (temp) { currentVitals.temp = temp; document.getElementById("valTemp").innerHTML = `${temp} <span style="font-size:0.9rem;">°F</span>`; document.getElementById("miniTemp").innerText = `${temp}°F`; }
+
+      alert("Vitals record updated successfully!");
+    }
+
+    function openReportModal() {
+      const modal = document.getElementById("reportModal");
+      const area = document.getElementById("reportPrintArea");
+      const medsText = patientCabinet.length > 0 ? patientCabinet.map(m => `• ${m.name} (${m.dosage})`).join('<br>') : "No active prescriptions logged.";
+      const vitalsText = `Heart Rate: ${currentVitals.bpm} BPM | BP: ${currentVitals.sys}/${currentVitals.dia} mmHg | SpO2: ${currentVitals.spo2}% | Temp: ${currentVitals.temp}°F`;
+
+      area.innerHTML = `
+        <div style="border-bottom:2px solid var(--accent-cyan); padding-bottom:8px; margin-bottom:12px;">
+          <h2 style="color:var(--accent-cyan);">MediPulse AI Patient Health Summary</h2>
+          <p style="font-size:0.8rem; color:var(--text-muted);">Generated: ${new Date().toLocaleString()}</p>
+        </div>
+        <div style="margin-bottom:12px;"><strong>Patient Profile:</strong> ${activePatient.name} (${activePatient.gender}, ${activePatient.age} yrs)<br><strong>Known Allergies:</strong> ${activePatient.allergies.join(', ') || 'None'}</div>
+        <div style="margin-bottom:12px; background:rgba(255,255,255,0.03); padding:10px; border-radius:6px;"><strong>Biometric Vitals:</strong><br>${vitalsText}</div>
+        <div style="margin-bottom:12px;"><strong>Prescription Cabinet:</strong><br>${medsText}</div>
+      `;
+      modal.classList.add("active");
+    }
+
+    function closeReportModal() {
+      document.getElementById("reportModal").classList.remove("active");
+    }
+  </script>
+</body>
+</html>
